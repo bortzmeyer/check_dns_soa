@@ -24,7 +24,6 @@ var (
 	timeout           time.Duration = 3 // seconds
 	maxtries          uint          = 3
 	warningThreshold  uint          = 1
-	criticalThreshold uint          = 1
 	v4only            bool          = false
 	v6only            bool          = false
 	requireAllServers bool          = false
@@ -91,7 +90,7 @@ func main() {
 	versionP := fs.Bool("V", false, "Displays the version number of the plugin")
 	verbosityP := fs.Uint("v", 0, "Verbosity (from 0 to 3)")
 	warningThresholdP := fs.Uint("w", warningThreshold, "Number of name servers broken to trigger a Warning")
-	criticalThresholdP := fs.Uint("c", criticalThreshold, "Number of name servers broken to trigger a Critical situation")
+	criticalThreshold := fs.Uint("c", 1, "Number of name servers broken to trigger a Critical situation")
 	timeoutP := fs.Uint("t", uint(timeout), "Timeout (in seconds)")
 	maxtriesP := fs.Uint("i", maxtries, "Maximum number of tests per nameserver")
 	ipv4P := fs.Bool("4", v4only, "Use IPv4 only")
@@ -144,14 +143,13 @@ func main() {
 	if *warningThresholdP < 1 {
 		*warningThresholdP = 1
 	}
-	if *criticalThresholdP < 1 {
-		*criticalThresholdP = 1
+	if *criticalThreshold < 1 {
+		*criticalThreshold = 1
 	}
-	if *warningThresholdP > *criticalThresholdP {
+	if *warningThresholdP > *criticalThreshold {
 		nagios.ExitStatus(nagios.UNKNOWN, "Critical threshold must be superior to warning threshold", nil, false)
 	}
 	warningThreshold = *warningThresholdP
-	criticalThreshold = *criticalThresholdP
 	nagios.Verbosity = *verbosityP
 	conf, err = dns.ClientConfigFromFile("/etc/resolv.conf")
 	if conf == nil {
@@ -351,7 +349,7 @@ func main() {
 			noteWell = fmt.Sprintf(" (but %d broken name servers)", brokenServers)
 		}
 		nagios.ExitStatus(nagios.OK, fmt.Sprintf("Zone %s is fine%s", zone, noteWell), infoMessages[0:infos], false)
-	} else if brokenServers < criticalThreshold {
+	} else if brokenServers < *criticalThreshold {
 		nagios.ExitStatus(nagios.WARNING, errorMessages[0], errorMessages[1:errors], false)
 	} else {
 		nagios.ExitStatus(nagios.CRITICAL, errorMessages[0], errorMessages[1:errors], false)
