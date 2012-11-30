@@ -1,11 +1,11 @@
 package main
 
 import (
-	"./nagios"
 	"bytes"
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/miekg/check_dns_soa/nagios" // Needed to make it compile...
 	"github.com/miekg/dns"
 	"net"
 	"os"
@@ -38,7 +38,7 @@ func localQuery(qname string, qtype uint16) (r *dns.Msg, err error) {
 	localm.Question[0] = dns.Question{qname, qtype, dns.ClassINET}
 	for serverIndex := range conf.Servers {
 		server := conf.Servers[serverIndex]
-		r, err := localc.Exchange(localm, server+":"+conf.Port)
+		r, _, err := localc.Exchange(localm, net.JoinHostPort(server, conf.Port))
 		if r == nil {
 			return r, err
 		}
@@ -59,7 +59,7 @@ func testSoa(msg *dns.Msg, server string, tries uint) (soa *dns.Msg, err error) 
 	tests := uint(0)
 	over := false
 	for !over {
-		soa, err = c.Exchange(msg, server)
+		soa, _, err = c.Exchange(msg, server)
 		if err != nil {
 			if e, ok := err.(net.Error); ok && e.Timeout() {
 				tests++
