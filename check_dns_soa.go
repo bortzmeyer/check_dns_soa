@@ -9,7 +9,6 @@ import (
 	"github.com/miekg/dns"
 	"net"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -274,13 +273,7 @@ func main() {
 			}
 			for j := range ips {
 				m.Question[0] = dns.Question{zone, dns.TypeSOA, dns.ClassINET}
-				nsAddressPort := ""
-				if strings.ContainsAny(":", ips[j]) {
-					/* IPv6 address */
-					nsAddressPort = "[" + ips[j] + "]:53"
-				} else {
-					nsAddressPort = ips[j] + ":53"
-				}
+				nsAddressPort := net.JoinHostPort(ips[j], "53")
 				soa, err := testSoa(m, nsAddressPort, maxtries)
 				if soa == nil {
 					if successServer {
