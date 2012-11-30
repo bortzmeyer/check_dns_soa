@@ -12,8 +12,8 @@ Use -h to see all the other options.
 
 The command-line options are not exactly following the Nagios standard
 <http://nagiosplug.sourceforge.net/developer-guidelines.html> This is
-because Go's standard command-line options parsing module, "flag", doe
-snot have exactly the semantics needed.
+because Go's standard command-line options parsing module, "flag", does
+not have exactly the semantics needed.
 
 TODO installation
 % go build check_dns_soa.go
