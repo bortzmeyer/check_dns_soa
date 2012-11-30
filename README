@@ -1,0 +1,23 @@
+A Nagios (or Icinga or other Nagios-compatible software) plugin to
+test the name servers of a DNS zone by querying every name server to
+ask it the SOA of the zone.
+
+Can detect non-responding servers and non-authoritative servers (lame
+delegation).
+
+Usage:
+/the/directory/of/nagios/plugins/check_dns_soa -H zonename
+
+Use -h to see all the other options.
+
+The command-line options are not exactly following the Nagios standard
+<http://nagiosplug.sourceforge.net/developer-guidelines.html> This is
+because Go's standard command-line options parsing module, "flag", doe
+snot have exactly the semantics needed.
+
+TODO installation
+% go build check_dns_soa.go
+% cp check_dns_soa /the/directory/of/nagios/plugins
+
+
+Stephane Bortzmeyer <stephane+nagios@bortzmeyer.org>
