@@ -23,7 +23,6 @@ const (
 var (
 	timeout           time.Duration = 3 // seconds
 	maxtries          uint          = 3
-	warningThreshold  uint          = 1
 	v4only            bool          = false
 	v6only            bool          = false
 	requireAllServers bool          = false
@@ -89,7 +88,7 @@ func main() {
 	zoneP := fs.String("H", "", "DNS zone name")
 	versionP := fs.Bool("V", false, "Displays the version number of the plugin")
 	verbosityP := fs.Uint("v", 0, "Verbosity (from 0 to 3)")
-	warningThresholdP := fs.Uint("w", warningThreshold, "Number of name servers broken to trigger a Warning")
+	warningThreshold := fs.Uint("w", 1, "Number of name servers broken to trigger a Warning")
 	criticalThreshold := fs.Uint("c", 1, "Number of name servers broken to trigger a Critical situation")
 	timeoutP := fs.Uint("t", uint(timeout), "Timeout (in seconds)")
 	maxtriesP := fs.Uint("i", maxtries, "Maximum number of tests per nameserver")
@@ -140,16 +139,15 @@ func main() {
 		*maxtriesP = 1
 	}
 	maxtries = *maxtriesP
-	if *warningThresholdP < 1 {
-		*warningThresholdP = 1
+	if *warningThreshold < 1 {
+		*warningThreshold = 1
 	}
 	if *criticalThreshold < 1 {
 		*criticalThreshold = 1
 	}
-	if *warningThresholdP > *criticalThreshold {
+	if *warningThreshold > *criticalThreshold {
 		nagios.ExitStatus(nagios.UNKNOWN, "Critical threshold must be superior to warning threshold", nil, false)
 	}
-	warningThreshold = *warningThresholdP
 	nagios.Verbosity = *verbosityP
 	conf, err = dns.ClientConfigFromFile("/etc/resolv.conf")
 	if conf == nil {
@@ -343,7 +341,7 @@ func main() {
 	if numNS == 0 {
 		nagios.ExitStatus(nagios.CRITICAL, fmt.Sprintf("No NS records for \"%s\". It is probably a CNAME to a domain but not a zone", zone), nil, false)
 	}
-	if brokenServers < warningThreshold {
+	if brokenServers < *warningThreshold {
 		noteWell := ""
 		if brokenServers > 0 {
 			noteWell = fmt.Sprintf(" (but %d broken name servers)", brokenServers)
