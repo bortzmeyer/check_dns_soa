@@ -129,9 +129,7 @@ func main() {
 	if len(zone) == 0 {
 		nagios.ExitStatus(nagios.UNKNOWN, fmt.Sprintf("Usage: %s -H ZONE", os.Args[0]), nil, false)
 	}
-	if zone[len(zone)-1] != '.' {
-		zone += "."
-	}
+	zone = dns.Fqdn(zone)
 	if *verbosityP > 3 {
 		*verbosityP = 3
 	}
