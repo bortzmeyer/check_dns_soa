@@ -115,6 +115,7 @@ func main() {
 	if *allServersP && (!*ipv4P && !*ipv6P) {
 		nagios.ExitStatus(nagios.UNKNOWN, fmt.Sprintf("-r does not make sense without -4 or -6"), nil, false)
 	}
+	// Not sure if this is needed, after the above flag parsing? 
 	if *ipv4P {
 		v4only = true
 	}
