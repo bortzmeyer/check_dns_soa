@@ -1,15 +1,14 @@
 package main
 
 import (
-	"./nagios"
 	"bytes"
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/miekg/check_dns_soa/nagios" // Needed to make it compile...
 	"github.com/miekg/dns"
 	"net"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -24,8 +23,6 @@ const (
 var (
 	timeout           time.Duration = 3 // seconds
 	maxtries          uint          = 3
-	warningThreshold  uint          = 1
-	criticalThreshold uint          = 1
 	v4only            bool          = false
 	v6only            bool          = false
 	requireAllServers bool          = false
@@ -38,7 +35,7 @@ func localQuery(qname string, qtype uint16) (r *dns.Msg, err error) {
 	localm.Question[0] = dns.Question{qname, qtype, dns.ClassINET}
 	for serverIndex := range conf.Servers {
 		server := conf.Servers[serverIndex]
-		r, err := localc.Exchange(localm, server+":"+conf.Port)
+		r, _, err := localc.Exchange(localm, net.JoinHostPort(server, conf.Port))
 		if r == nil {
 			return r, err
 		}
@@ -59,7 +56,7 @@ func testSoa(msg *dns.Msg, server string, tries uint) (soa *dns.Msg, err error) 
 	tests := uint(0)
 	over := false
 	for !over {
-		soa, err = c.Exchange(msg, server)
+		soa, _, err = c.Exchange(msg, server)
 		if err != nil {
 			if e, ok := err.(net.Error); ok && e.Timeout() {
 				tests++
@@ -91,8 +88,8 @@ func main() {
 	zoneP := fs.String("H", "", "DNS zone name")
 	versionP := fs.Bool("V", false, "Displays the version number of the plugin")
 	verbosityP := fs.Uint("v", 0, "Verbosity (from 0 to 3)")
-	warningThresholdP := fs.Uint("w", warningThreshold, "Number of name servers broken to trigger a Warning")
-	criticalThresholdP := fs.Uint("c", criticalThreshold, "Number of name servers broken to trigger a Critical situation")
+	warningThreshold := fs.Uint("w", 1, "Number of name servers broken to trigger a Warning")
+	criticalThreshold := fs.Uint("c", 1, "Number of name servers broken to trigger a Critical situation")
 	timeoutP := fs.Uint("t", uint(timeout), "Timeout (in seconds)")
 	maxtriesP := fs.Uint("i", maxtries, "Maximum number of tests per nameserver")
 	ipv4P := fs.Bool("4", v4only, "Use IPv4 only")
@@ -116,6 +113,7 @@ func main() {
 	if *allServersP && (!*ipv4P && !*ipv6P) {
 		nagios.ExitStatus(nagios.UNKNOWN, fmt.Sprintf("-r does not make sense without -4 or -6"), nil, false)
 	}
+	// Not sure if this is needed, after the above flag parsing? 
 	if *ipv4P {
 		v4only = true
 	}
@@ -129,9 +127,7 @@ func main() {
 	if len(zone) == 0 {
 		nagios.ExitStatus(nagios.UNKNOWN, fmt.Sprintf("Usage: %s -H ZONE", os.Args[0]), nil, false)
 	}
-	if zone[len(zone)-1] != '.' {
-		zone += "."
-	}
+	zone = dns.Fqdn(zone)
 	if *verbosityP > 3 {
 		*verbosityP = 3
 	}
@@ -143,17 +139,15 @@ func main() {
 		*maxtriesP = 1
 	}
 	maxtries = *maxtriesP
-	if *warningThresholdP < 1 {
-		*warningThresholdP = 1
+	if *warningThreshold < 1 {
+		*warningThreshold = 1
 	}
-	if *criticalThresholdP < 1 {
-		*criticalThresholdP = 1
+	if *criticalThreshold < 1 {
+		*criticalThreshold = 1
 	}
-	if *warningThresholdP > *criticalThresholdP {
+	if *warningThreshold > *criticalThreshold {
 		nagios.ExitStatus(nagios.UNKNOWN, "Critical threshold must be superior to warning threshold", nil, false)
 	}
-	warningThreshold = *warningThresholdP
-	criticalThreshold = *criticalThresholdP
 	nagios.Verbosity = *verbosityP
 	conf, err = dns.ClientConfigFromFile("/etc/resolv.conf")
 	if conf == nil {
@@ -276,13 +270,7 @@ func main() {
 			}
 			for j := range ips {
 				m.Question[0] = dns.Question{zone, dns.TypeSOA, dns.ClassINET}
-				nsAddressPort := ""
-				if strings.ContainsAny(":", ips[j]) {
-					/* IPv6 address */
-					nsAddressPort = "[" + ips[j] + "]:53"
-				} else {
-					nsAddressPort = ips[j] + ":53"
-				}
+				nsAddressPort := net.JoinHostPort(ips[j], "53")
 				soa, err := testSoa(m, nsAddressPort, maxtries)
 				if soa == nil {
 					if successServer {
@@ -353,13 +341,13 @@ func main() {
 	if numNS == 0 {
 		nagios.ExitStatus(nagios.CRITICAL, fmt.Sprintf("No NS records for \"%s\". It is probably a CNAME to a domain but not a zone", zone), nil, false)
 	}
-	if brokenServers < warningThreshold {
+	if brokenServers < *warningThreshold {
 		noteWell := ""
 		if brokenServers > 0 {
 			noteWell = fmt.Sprintf(" (but %d broken name servers)", brokenServers)
 		}
 		nagios.ExitStatus(nagios.OK, fmt.Sprintf("Zone %s is fine%s", zone, noteWell), infoMessages[0:infos], false)
-	} else if brokenServers < criticalThreshold {
+	} else if brokenServers < *criticalThreshold {
 		nagios.ExitStatus(nagios.WARNING, errorMessages[0], errorMessages[1:errors], false)
 	} else {
 		nagios.ExitStatus(nagios.CRITICAL, errorMessages[0], errorMessages[1:errors], false)
