@@ -15,7 +15,8 @@ The command-line options are not exactly following the Nagios standard
 because Go's standard command-line options parsing module, "flag", does
 not have exactly the semantics needed.
 
-TODO installation
+[If not already installed, install GoDNS]
+# go get github.com/miekg/dns
 % go build check_dns_soa.go
 % cp check_dns_soa /the/directory/of/nagios/plugins
 

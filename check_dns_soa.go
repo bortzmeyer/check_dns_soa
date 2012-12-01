@@ -5,7 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/miekg/check_dns_soa/nagios" // Needed to make it compile...
+	"./nagios" 
 	"github.com/miekg/dns"
 	"net"
 	"os"
