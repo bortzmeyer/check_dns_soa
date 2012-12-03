@@ -201,7 +201,7 @@ func main() {
 						successServer = false
 					}
 					if errors < MAXERRS {
-						errorMessages[errors] = fmt.Sprintf("Error getting the IPv4 address of %s: %s", nameserver, dns.Rcode_str[ra.Rcode])
+						errorMessages[errors] = fmt.Sprintf("Error getting the IPv4 address of %s: %s", nameserver, dns.RcodeToString[ra.Rcode])
 						errors++
 					}
 					continue
@@ -233,7 +233,7 @@ func main() {
 						successServer = false
 					}
 					if errors < MAXERRS {
-						errorMessages[errors] = fmt.Sprintf("Error getting the IPv6 address of %s: %s", nameserver, dns.Rcode_str[raaaa.Rcode])
+						errorMessages[errors] = fmt.Sprintf("Error getting the IPv6 address of %s: %s", nameserver, dns.RcodeToString[raaaa.Rcode])
 						errors++
 					}
 					continue
@@ -288,7 +288,7 @@ func main() {
 							successServer = false
 						}
 						if errors < MAXERRS {
-							errorMessages[errors] = fmt.Sprintf("%s (%s) ", ips[j], dns.Rcode_str[soa.Rcode])
+							errorMessages[errors] = fmt.Sprintf("%s (%s) ", ips[j], dns.RcodeToString[soa.Rcode])
 							errors++
 						}
 					} else {
