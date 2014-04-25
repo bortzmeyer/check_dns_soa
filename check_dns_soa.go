@@ -51,7 +51,6 @@ func localQuery(qname string, qtype uint16) (r *dns.Msg, err error) {
 
 func testSoa(msg *dns.Msg, server string, tries uint) (soa *dns.Msg, err error) {
 	c := new(dns.Client)
-	c.Retry = false // TODO allow to set it to true
 	c.ReadTimeout = timeout * 1e9
 	tests := uint(0)
 	over := false
