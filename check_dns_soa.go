@@ -51,7 +51,6 @@ func localQuery(qname string, qtype uint16) (r *dns.Msg, err error) {
 
 func testSoa(msg *dns.Msg, server string, tries uint) (soa *dns.Msg, err error) {
 	c := new(dns.Client)
-	c.Retry = false // TODO allow to set it to true
 	c.ReadTimeout = timeout * 1e9
 	tests := uint(0)
 	over := false
@@ -154,6 +153,7 @@ func main() {
 		nagios.ExitStatus(nagios.UNKNOWN, fmt.Sprintf("Cannot initialize the local resolver: %s", err), nil, false)
 	}
 	localm = new(dns.Msg)
+	localm.Id = dns.Id()
 	localm.MsgHdr.RecursionDesired = true
 	localm.Question = make([]dns.Question, 1)
 	localc = new(dns.Client)
@@ -166,6 +166,7 @@ func main() {
 		nagios.ExitStatus(nagios.CRITICAL, fmt.Sprintf("No such domain %s", zone), nil, false)
 	}
 	m := new(dns.Msg)
+	m.Id = dns.Id()
 	m.MsgHdr.RecursionDesired = false
 	m.Question = make([]dns.Question, 1)
 	brokenServers := uint(0)
