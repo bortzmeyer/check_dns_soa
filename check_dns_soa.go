@@ -177,8 +177,8 @@ func main() {
 		successServer := true
 		ans := r.Answer[i]
 		switch ans.(type) {
-		case *dns.RR_NS:
-			nameserver := ans.(*dns.RR_NS).Ns
+		case *dns.NS:
+			nameserver := ans.(*dns.NS).Ns
 			numNS += 1
 			ips := make([]string, 0)
 			infoMessages[infos] = fmt.Sprintf("%s : ", nameserver)
@@ -209,8 +209,8 @@ func main() {
 				for j := range ra.Answer {
 					ansa := ra.Answer[j]
 					switch ansa.(type) {
-					case *dns.RR_A:
-						ips = append(ips, ansa.(*dns.RR_A).A.String())
+					case *dns.A:
+						ips = append(ips, ansa.(*dns.A).A.String())
 					}
 				}
 			}
@@ -241,8 +241,8 @@ func main() {
 				for j := range raaaa.Answer {
 					ansaaaa := raaaa.Answer[j]
 					switch ansaaaa.(type) {
-					case *dns.RR_AAAA:
-						ips = append(ips, ansaaaa.(*dns.RR_AAAA).AAAA.String())
+					case *dns.AAAA:
+						ips = append(ips, ansaaaa.(*dns.AAAA).AAAA.String())
 					}
 				}
 			}
@@ -304,10 +304,10 @@ func main() {
 						} else {
 							rsoa := soa.Answer[0]
 							switch rsoa.(type) {
-							case *dns.RR_SOA:
+							case *dns.SOA:
 								if soa.MsgHdr.Authoritative {
 									/* TODO: test if all name servers have the same serial ? */
-									infoMessages[infos] += fmt.Sprintf("%s (%d) ", ips[j], rsoa.(*dns.RR_SOA).Serial)
+									infoMessages[infos] += fmt.Sprintf("%s (%d) ", ips[j], rsoa.(*dns.SOA).Serial)
 								} else {
 									if successServer {
 										brokenServers += 1
