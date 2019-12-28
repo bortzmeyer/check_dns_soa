@@ -2,30 +2,4 @@ A Nagios (or Icinga or other Nagios-compatible software) plugin to
 test the name servers of a DNS zone by querying every name server to
 ask it the SOA of the zone.
 
-Can detect non-responding servers and non-authoritative servers (lame
-delegation).
-
-Usage:
-/the/directory/of/nagios/plugins/check_dns_soa -H zonename
-
-Use -h to see all the other options.
-
-The command-line options are not exactly following the Nagios standard
-<http://nagiosplug.sourceforge.net/developer-guidelines.html> This is
-because Go's standard command-line options parsing module, "flag", does
-not have exactly the semantics needed.
-
-[If not already installed, install GoDNS]
-# go get github.com/miekg/dns
-% go build check_dns_soa.go
-% cp check_dns_soa /the/directory/of/nagios/plugins
-
-Copyright (c) 2012, Stephane Bortzmeyer All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-Stephane Bortzmeyer <stephane+nagios@bortzmeyer.org>
+Now hosted at FramaGit <https://framagit.org/bortzmeyer/check_dns_soa/>
